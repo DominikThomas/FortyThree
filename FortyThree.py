@@ -28,7 +28,8 @@ newconfig1=(float(config1[1])-float(config0[1]))/(float(config1[0])-float(config
 path1=path0+'spc_frk'
 os.chdir(path1)
 soubor=glob.glob(path1 + '/*.FRK')
-for i1 in range(0, len(soubor)):
+i1=1
+if (i1==1): #for i1 in range(0, len(soubor)):
     #print(i1)
     Y0=[0]*8192
     f1=open(soubor[i1])
@@ -43,7 +44,7 @@ for i1 in range(0, len(soubor)):
         Y=Y0
     else:
         print("Chyba parametru 'vyhlazeni'. Nutno zadat ANO nebo NE")
-        break
+        #break
     C2=[0]*8192 #energie
     C=[0]*8192 #kanál
     Z=[0]*8192 #derivace spektra
@@ -65,8 +66,8 @@ for i1 in range(0, len(soubor)):
         if (i6==0):
             l11=G0[i6]
             l12=0
-        l1=G0[i6]
-        l2=max(G0[i6+sirka],l11)
+        l1=max(G0[i6],l12)
+        l2=max(G0[i6]+sirka,l1)
         while True:
             l1-=1
             if(l1==0 or l1==l12 or Z[max(l1,1)]<-0.1):
@@ -74,14 +75,14 @@ for i1 in range(0, len(soubor)):
         if l1==0:
             l1=1
         H0.append(l1)
-        if(l2<len(C2)):
+        if(l2<(len(C2)-1)):
             while True:
                 l2+=1
-                if(l2==len(C2) or Z[l2]>0.1):
+                if(l2==(len(C2)-1) or Z[l2]>0.1):
                     break
             H1.append(l2-1)
         else:
-            H1.append(l2)
+            H1.append((l2-1))
         l11=l1
         l12=l2
     del l1, l2, l12, l11
@@ -106,7 +107,7 @@ for i1 in range(0, len(soubor)):
         G25.append(len(Y[H01[i8]:H11[i8]])) #šířka píku v kanálech
     pozadi=[]
     for i9 in range (0, len(G23)):
-        pozadi.append(Y[G23[i9]])
+        pozadi.append(Y[G22[i9]])
     
 ## Vyhlazování pozadí
     
@@ -134,9 +135,8 @@ for i1 in range(0, len(soubor)):
     plt.plot(C2, Y) #vykreslení spektra
     plt.plot(X, G24, 'r') #vykreslení pozadí
     
+print('Hotovo! Zobrazuji grafy.')
 plt.show()
-print('Hotovo!')
-    
     
 #del(i0,i1,i2,Y,Y0,C,C2)
 
