@@ -1,10 +1,16 @@
 import matplotlib
 matplotlib.use("Qt4Agg")
 import numpy as np, os, glob , matplotlib.pyplot as plt
+
+## Vstupní konstanty
+
 vaha=50
 sirka=2
 cykl=20 #počet cyklů na vyhlazení pozadí 
 vyhlazeni="NE" #zda vyhlazovat samotné spektrum
+
+## Načtení a zpracování konfiguračního souboru
+
 path0='/media/dominik/Windows8_OS/Deimos32python/'
 os.chdir(path0)
 cfgname=glob.glob(path0 + '/*.cfg')[0]
@@ -16,6 +22,9 @@ for i0 in range(0, 20):
     f0.readline()
 newconfig0=float(config0[1])-float(config0[0])*(float(config1[1])-float(config0[1]))/(float(config1[0])-float(config0[0]))
 newconfig1=(float(config1[1])-float(config0[1]))/(float(config1[0])-float(config0[0]))
+
+## Načtení a zpracování souborů FRK ze spektrometru Deimos32
+
 path1=path0+'spc_frk'
 os.chdir(path1)
 soubor=glob.glob(path1 + '/*.FRK')
@@ -54,14 +63,13 @@ for i1 in range(0, len(soubor)):
             G1.append(C2[i5])
     for i6 in range(0, len(G0)-sirka):
         if (i6==0):
-            l1=G0[i6]
-            l2=G0[i6+sirka]
-        else:
-            l1=min(len(Z),max(G0[i6],l2))
-            l2=min(len(Z),max(G0[i6+sirka],(l1+sirka)))
+            l11=G0[i6]
+            l12=0
+        l1=G0[i6]
+        l2=max(G0[i6+sirka],l11)
         while True:
             l1-=1
-            if(l1==0 or Z[max(l1,1)]<-0.1):
+            if(l1==0 or l1==l12 or Z[max(l1,1)]<-0.1):
                 break
         if l1==0:
             l1=1
@@ -74,6 +82,9 @@ for i1 in range(0, len(soubor)):
             H1.append(l2-1)
         else:
             H1.append(l2)
+        l11=l1
+        l12=l2
+    del l1, l2, l12, l11
     H01=[H0[0]]
     H11=[H1[0]]
     for i7 in range (1, len(H0)): #odstranění duplicitních píků
@@ -96,6 +107,9 @@ for i1 in range(0, len(soubor)):
     pozadi=[]
     for i9 in range (0, len(G23)):
         pozadi.append(Y[G23[i9]])
+    
+## Vyhlazování pozadí
+    
     for i10 in range (0,cykl):
         P0=[]
         P0.extend(pozadi)
@@ -104,18 +118,22 @@ for i1 in range(0, len(soubor)):
         P1[0]=P0[0]
         P1[len(P0)-1]=P0[len(P0)-1]
         for i11 in range (1,len(P0)-1):
-            P1[i11]=min(P0[i11],np.mean([P0[i11-1],P0[i11],P0[i11+1]]))
-            #P1[i11]=np.mean([P0[i11-1],P0[i11],P0[i11+1]]) #min(P0[i11],np.mean([P0[i11-1],P0[i11],P0[i11+1]]))
+            if (i10<(cykl/3)):
+                P1[i11]=min(P0[i11],np.mean([P0[i11-1],P0[i11],P0[i11+1]]))
+            else:
+                P1[i11]=np.mean([P0[i11-1],P0[i11],P0[i11+1]])
         pozadi.extend(P1)    
     G24.extend(pozadi)
     
-    #plot
+## Vykreslení spektra a pozadí
+    
     plt.figure(i1)
     X=[0]*len(G23)
     for i in range (0,len(G23)):
         X[i]=C2[G23[i]]
     plt.plot(C2, Y) #vykreslení spektra
     plt.plot(X, G24, 'r') #vykreslení pozadí
+    
 plt.show()
 print('Hotovo!')
     
