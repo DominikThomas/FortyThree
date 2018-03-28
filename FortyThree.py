@@ -56,9 +56,9 @@ for i1 in range(0, len(soubor)):
         if (i6==0):
             l1=G0[i6]
             l2=G0[i6+sirka]
-        else
-            l1=max(G0[i6],l2)
-            l2=max(G0[i6+sirka],(l1+sirka))
+        else:
+            l1=min(len(Z),max(G0[i6],l2))
+            l2=min(len(Z),max(G0[i6+sirka],(l1+sirka)))
         while True:
             l1-=1
             if(l1==0 or Z[max(l1,1)]<-0.1):
