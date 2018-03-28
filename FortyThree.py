@@ -1,10 +1,10 @@
-#import matplotlib
-#matplotlib.use("Qt4Agg")
-import numpy as np, os, glob #, matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("Qt4Agg")
+import numpy as np, os, glob , matplotlib.pyplot as plt
 vaha=50
 sirka=2
 cykl=20 #počet cyklů na vyhlazení pozadí 
-vyhlazeni="NE"
+vyhlazeni="NE" #zda vyhlazovat samotné spektrum
 path0='/media/dominik/Windows8_OS/Deimos32python/'
 os.chdir(path0)
 cfgname=glob.glob(path0 + '/*.cfg')[0]
@@ -53,8 +53,12 @@ for i1 in range(0, len(soubor)):
             G0.append(C[i5])
             G1.append(C2[i5])
     for i6 in range(0, len(G0)-sirka):
-        l1=G0[i6]
-        l2=G0[i6+sirka]
+        if (i6==0):
+            l1=G0[i6]
+            l2=G0[i6+sirka]
+        else
+            l1=max(G0[i6],l2)
+            l2=max(G0[i6+sirka],(l1+sirka))
         while True:
             l1-=1
             if(l1==0 or Z[max(l1,1)]<-0.1):
@@ -101,16 +105,18 @@ for i1 in range(0, len(soubor)):
         P1[len(P0)-1]=P0[len(P0)-1]
         for i11 in range (1,len(P0)-1):
             P1[i11]=min(P0[i11],np.mean([P0[i11-1],P0[i11],P0[i11+1]]))
+            #P1[i11]=np.mean([P0[i11-1],P0[i11],P0[i11+1]]) #min(P0[i11],np.mean([P0[i11-1],P0[i11],P0[i11+1]]))
         pozadi.extend(P1)    
     G24.extend(pozadi)
+    
     #plot
-    #plt.figure(i1)
+    plt.figure(i1)
     X=[0]*len(G23)
     for i in range (0,len(G23)):
         X[i]=C2[G23[i]]
-#    plt.plot(C2, Y)
-#    plt.plot(X, pozadi, 'r')
-#plt.show()
+    plt.plot(C2, Y) #vykreslení spektra
+    plt.plot(X, G24, 'r') #vykreslení pozadí
+plt.show()
 print('Hotovo!')
     
     
