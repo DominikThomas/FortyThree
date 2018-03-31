@@ -25,9 +25,12 @@ newconfig1=(float(config1[1])-float(config0[1]))/(float(config1[0])-float(config
 
 ## Načtení a zpracování souborů FRK ze spektrometru Deimos32
 
-path1=path0+'spc_frk'
-os.chdir(path1)
-soubor=glob.glob(path1 + '/*.FRK')
+pathFRK=path0+'spc_frk'
+os.chdir(pathFRK)
+soubor=glob.glob(pathFRK + '/*.FRK')
+print ('Zpracovávám následující soubory:')
+for i0b in range(0, len(soubor)):
+    print (i0b, soubor[i0b].replace(pathFRK + '/', ''))
 for i1 in range(0, len(soubor)):
     #print(i1)
     Y0=[0]*8192
@@ -99,6 +102,7 @@ for i1 in range(0, len(soubor)):
     G23=[] #pravý okraj píku
     G24=[] #pozadí
     G25=[] #šířka píku v kanálech
+    G26=[] #plocha píku bez pozadí
     for i8 in range (0,len(H01)):
         G20.append(C2[Y.index(max(Y[H01[i8]:H11[i8]]))]) #energie maxima píku
         G21.append(sum(Y[H01[i8]:H11[i8]])) #suma píku i s pozadím
@@ -109,6 +113,7 @@ for i1 in range(0, len(soubor)):
     pozadi=[]
     for i9 in range (0, len(G23)):
         pozadi.append(Y[G23[i9]])
+
     
 ## Vyhlazování pozadí
     
@@ -127,10 +132,21 @@ for i1 in range(0, len(soubor)):
         pozadi.extend(P1)    
     G24.extend(pozadi)
     
+    
+    
+    G26.append(G21[0]-(Y[G22[0]]/2+G24[0]/2)*G25[0])
+    for i9b in range(1,len(G25)):
+        G26.append(G21[i9b]-(G24[i9b-1]/2+G24[i9b]/2)*G25[i9b])
+        
+    for i9c in range(0,len(G26)):
+        if G26[i9c]<0:
+            G20[i9c]=[];G21[i9c]=[];G22[i9c]=[];G23[i9c]=[];G24[i9c]=[];G25[i9c]=[];G26[i9c]=[]
+    for i9d in range(0,G20.count([])):
+        G20.remove([]);G21.remove([]);G22.remove([]);G23.remove([]);G24.remove([]);G25.remove([]);G26.remove([])
 ## Vykreslení spektra a pozadí
     
     plt.figure(i1)
-    plt.title(soubor[i1].replace(path1 + '/' , '').replace('.FRK',''))
+    plt.title(soubor[i1].replace(pathFRK + '/' , '').replace('.FRK',''))
     plt.xlabel('Energie (keV)')
     plt.ylabel('Cetnost (-)')
     X=[0]*len(G23)
@@ -139,10 +155,26 @@ for i1 in range(0, len(soubor)):
     plt.plot(C2, Y) #vykreslení spektra
     plt.plot(X, G24, 'r') #vykreslení pozadí
     
+## Načtení hodnot tlive treal a data ze souboru txt    
+    
+    text=glob.glob(soubor[i1].replace('spc_frk', 'txt').replace('.FRK','.TXT'))
+    f2=open(text[0])
+    for i in range(0,7):
+        if i==6:
+            Time=f2.readline().replace('                  ','').replace('\r\n', '')
+            Treal=f2.readline().replace('                   ','').replace(' sec\r\n', '')
+            Tlive=f2.readline().replace('                   ','').replace(' sec\r\n', '')
+        f2.readline()
+        
+## Zapisování dat do souboru
+    
+    vystup = open(soubor[i1].replace(pathFRK + '/', '').replace('FRK','OUTpy'))
+    vystup.write
+    
+    
+    
 print('Hotovo! Zobrazuji grafy.')
 plt.show()
     
 #del(i0,i1,i2,Y,Y0,C,C2)
-
-    
     
