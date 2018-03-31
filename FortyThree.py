@@ -173,19 +173,17 @@ for i1 in range(0, len(soubor)):
 ## Zapisování dat do souboru
     
     vystup = open(soubor[i1].replace(pathFRK + '/', '').replace('FRK','OUTpy'),'w')
-    vystup.write('Vyhodnocováno souborem: %s \n' %(str(os.path.basename(__file__))))
-    vystup.write('%s \n' %(Time)) 
-    vystup.write('%s \n' %(Treal))
-    vystup.write('%s \n' %(Tlive))
+    vystup.write('Vyhodnocováno souborem: %s \n \n' %(str(os.path.basename(__file__))))
+    vystup.write('%s \n %s \n %s \n \n' %(Time, Treal, Tlive)) 
     vystup.write('Energie (keV)        Plocha (-)\n')
     for i in range (0,len(G20)):
-        vystup.write('%f     %f \n' % (G20[i], G26[i]) )
+        vystup.write('%f                   %f \n' % (G20[i], G26[i]) )
     vystup.close
     
     
     
 print('Hotovo! Zobrazuji grafy.')
-plt.show()
+#plt.show()
     
 #del(i0,i1,i2,Y,Y0,C,C2)
     
