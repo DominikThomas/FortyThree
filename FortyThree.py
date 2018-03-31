@@ -1,13 +1,13 @@
-import matplotlib
-matplotlib.use("Qt4Agg")
+#import matplotlib
+#matplotlib.use("Qt4Agg")
 import numpy as np, os, glob , matplotlib.pyplot as plt
 
 ## Vstupní konstanty
 
-vaha=50
 sirka=2
 cykl=20 #počet cyklů na vyhlazení pozadí 
 vyhlazeni="NE" #zda vyhlazovat samotné spektrum
+vaha=50 #váha prostřední hodnoty při vyhlazování spektra
 
 ## Načtení a zpracování konfiguračního souboru
 
@@ -28,8 +28,7 @@ newconfig1=(float(config1[1])-float(config0[1]))/(float(config1[0])-float(config
 path1=path0+'spc_frk'
 os.chdir(path1)
 soubor=glob.glob(path1 + '/*.FRK')
-i1=1
-if (i1==1): #for i1 in range(0, len(soubor)):
+for i1 in range(0, len(soubor)):
     #print(i1)
     Y0=[0]*8192
     f1=open(soubor[i1])
@@ -44,7 +43,7 @@ if (i1==1): #for i1 in range(0, len(soubor)):
         Y=Y0
     else:
         print("Chyba parametru 'vyhlazeni'. Nutno zadat ANO nebo NE")
-        #break
+        break
     C2=[0]*8192 #energie
     C=[0]*8192 #kanál
     Z=[0]*8192 #derivace spektra
@@ -66,8 +65,10 @@ if (i1==1): #for i1 in range(0, len(soubor)):
         if (i6==0):
             l11=G0[i6]
             l12=0
-        l1=max(G0[i6],l12)
-        l2=max(G0[i6]+sirka,l1)
+        l1=max(G0[i6],l12+1)
+        l2=max(l1+sirka,l11)
+        if (l1>len(Z) or l2>len(Z)):
+            break
         while True:
             l1-=1
             if(l1==0 or l1==l12 or Z[max(l1,1)]<-0.1):
@@ -75,14 +76,14 @@ if (i1==1): #for i1 in range(0, len(soubor)):
         if l1==0:
             l1=1
         H0.append(l1)
-        if(l2<(len(C2)-1)):
+        if(l2<len(C2)):
             while True:
                 l2+=1
-                if(l2==(len(C2)-1) or Z[l2]>0.1):
+                if(l2==(len(C2)-1) or l2>len(C2) or Z[l2]>0.1):
                     break
-            H1.append(l2-1)
+            H1.append(l2)
         else:
-            H1.append((l2-1))
+            H1.append(l2-1)
         l11=l1
         l12=l2
     del l1, l2, l12, l11
@@ -107,7 +108,7 @@ if (i1==1): #for i1 in range(0, len(soubor)):
         G25.append(len(Y[H01[i8]:H11[i8]])) #šířka píku v kanálech
     pozadi=[]
     for i9 in range (0, len(G23)):
-        pozadi.append(Y[G22[i9]])
+        pozadi.append(Y[G23[i9]])
     
 ## Vyhlazování pozadí
     
@@ -119,7 +120,7 @@ if (i1==1): #for i1 in range(0, len(soubor)):
         P1[0]=P0[0]
         P1[len(P0)-1]=P0[len(P0)-1]
         for i11 in range (1,len(P0)-1):
-            if (i10<(cykl/3)):
+            if (i10<(cykl-1)):
                 P1[i11]=min(P0[i11],np.mean([P0[i11-1],P0[i11],P0[i11+1]]))
             else:
                 P1[i11]=np.mean([P0[i11-1],P0[i11],P0[i11+1]])
@@ -129,6 +130,9 @@ if (i1==1): #for i1 in range(0, len(soubor)):
 ## Vykreslení spektra a pozadí
     
     plt.figure(i1)
+    plt.title(soubor[i1].replace(path1 + '/' , '').replace('.FRK',''))
+    plt.xlabel('Energie (keV)')
+    plt.ylabel('Cetnost (-)')
     X=[0]*len(G23)
     for i in range (0,len(G23)):
         X[i]=C2[G23[i]]
