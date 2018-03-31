@@ -9,15 +9,15 @@ import numpy as np, os, glob, sys, matplotlib.pyplot as plt
 ## Vstupní konstanty
 
 sirka=2
-cykl=20 #počet cyklů na vyhlazení pozadí 
+cykl=80 #počet cyklů na vyhlazení pozadí 
 vyhlazeni="NE" #zda vyhlazovat samotné spektrum
 vaha=50 #váha prostřední hodnoty při vyhlazování spektra
 ampl=-10000 #diskriminace dle plochy píku bez pozadí, píky s plochou menší než 'ampl' nebudou vypsány ve výstupním souboru 
-grafy=raw_input('Chcete na závěr vyhodnocování zobrazit grafy spekter a pozadí? ')
+grafy=input('Chcete na závěr vyhodnocování zobrazit grafy spekter a pozadí? ')
 
 ## Načtení a zpracování konfiguračního souboru
 
-path0='/media/dominik/Windows8_OS/Deimos32python/'
+path0='/media/dominik/Windows8_OS/Deimos32/'
 os.chdir(path0)
 cfgname=glob.glob(path0 + '/*.cfg')[0]
 f0=open(cfgname)
@@ -37,7 +37,7 @@ soubor=glob.glob(pathFRK + '/*.FRK')
 print ('Zpracovávám následující soubory:')
 #for i0b in range(0, len(soubor)):
 #    print (i0b, soubor[i0b].replace(pathFRK + '/', ''))
-for i1 in range(0,len(soubor)): # 1): #
+for i1 in range(5,6): # len(soubor)): # 
     #print(i1)
     print (i1, soubor[i1].replace(pathFRK + '/', ''))
     Y0=[0]*8192
@@ -121,26 +121,34 @@ for i1 in range(0,len(soubor)): # 1): #
     pozadi=[]
     for i9 in range (0, len(G23)):
         pozadi.append(Y[G23[i9]])
+    plt.plot(pozadi)
+    plt.show()
 
     
 ## Vyhlazování pozadí
     
+    PP=[0.0]*len(C2)
+    for i9e in range (0,len(G23)-1):
+        PP[G23[i9e]]=pozadi[i9e]
+        inkrement=(pozadi[i9e+1]-pozadi[i9e])/(G23[i9e+1]-G23[i9e])
+        for i9f in range (0,(G23[i9e+1]-G23[i9e])):
+            PP[G23[i9e]+i9f]=PP[G23[i9e]]+i9f*inkrement
+    
     for i10 in range (0,cykl):
         P0=[]
-        P0.extend(pozadi)
-        pozadi=[]
+        P0.extend(PP)
+        PP=[]
         P1=[0.0]*len(P0)
         P1[0]=P0[0]
         P1[len(P0)-1]=P0[len(P0)-1]
         for i11 in range (1,len(P0)-1):
             if (i10<(cykl)):
-                P1[i11]=min(P0[i11],np.mean([P0[i11-1],P0[i11],P0[i11+1]]))
+                P1[i11]=min(Y[i11],np.mean([P0[i11-1],P0[i11],P0[i11+1]]))
             else:
                 P1[i11]=np.mean([P0[i11-1],P0[i11],P0[i11+1]])
-        pozadi.extend(P1)    
-    G24.extend(pozadi)
-    
-    
+        PP.extend(P1)    
+    for i10a in range (0,len(G23)):
+        G24.append(PP[G23[i10a]])    
     
     G26.append(G21[0]-(Y[G22[0]]/2+G24[0]/2)*G25[0])
     for i9b in range(1,len(G25)):
@@ -161,7 +169,10 @@ for i1 in range(0,len(soubor)): # 1): #
     for i in range (0,len(G23)):
         X[i]=C2[G23[i]]
     plt.plot(C2, Y) #vykreslení spektra
-    plt.plot(X, G24, 'r') #vykreslení pozadí
+    import scipy.signal.savgol_filter
+    YX=scipy.signal.savgol_filter(Y,10,2)
+    plt.plot(C2, YX)
+    plt.plot(C2, PP, 'r') #vykreslení pozadí
     
 ## Načtení hodnot tlive treal a data ze souboru txt     
     
