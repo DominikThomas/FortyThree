@@ -12,7 +12,8 @@ sirka=2
 cykl=20 #počet cyklů na vyhlazení pozadí 
 vyhlazeni="NE" #zda vyhlazovat samotné spektrum
 vaha=50 #váha prostřední hodnoty při vyhlazování spektra
-ampl=10 #diskriminace dle plochy píku bez pozadí, píky s plochou menší než 'ampl' nebudou vypsány ve výstupním souboru
+ampl=-10000 #diskriminace dle plochy píku bez pozadí, píky s plochou menší než 'ampl' nebudou vypsány ve výstupním souboru 
+grafy=raw_input('Chcete na závěr vyhodnocování zobrazit grafy spekter a pozadí? ')
 
 ## Načtení a zpracování konfiguračního souboru
 
@@ -34,10 +35,11 @@ pathFRK=path0+'spc_frk'
 os.chdir(pathFRK)
 soubor=glob.glob(pathFRK + '/*.FRK')
 print ('Zpracovávám následující soubory:')
-for i0b in range(0, len(soubor)):
-    print (i0b, soubor[i0b].replace(pathFRK + '/', ''))
-for i1 in range(0, len(soubor)):
+#for i0b in range(0, len(soubor)):
+#    print (i0b, soubor[i0b].replace(pathFRK + '/', ''))
+for i1 in range(0,len(soubor)): # 1): #
     #print(i1)
+    print (i1, soubor[i1].replace(pathFRK + '/', ''))
     Y0=[0]*8192
     f1=open(soubor[i1])
     for i2 in range(0, len(Y0)):
@@ -109,7 +111,8 @@ for i1 in range(0, len(soubor)):
     G25=[] #šířka píku v kanálech
     G26=[] #plocha píku bez pozadí
     for i8 in range (0,len(H01)):
-        G20.append(C2[Y.index(max(Y[H01[i8]:H11[i8]]))]) #energie maxima píku
+        maximum, index = max((val, idx) for idx, val in enumerate(Y[H01[i8]:H11[i8]]))
+        G20.append(C2[H01[i8]+index]) #energie maxima píku
         G21.append(sum(Y[H01[i8]:H11[i8]])) #suma píku i s pozadím
         G22.append(H01[i8]) #levý okraj píku
         G23.append(H11[i8]) #pravý okraj píku
@@ -130,7 +133,7 @@ for i1 in range(0, len(soubor)):
         P1[0]=P0[0]
         P1[len(P0)-1]=P0[len(P0)-1]
         for i11 in range (1,len(P0)-1):
-            if (i10<(cykl-1)):
+            if (i10<(cykl)):
                 P1[i11]=min(P0[i11],np.mean([P0[i11-1],P0[i11],P0[i11+1]]))
             else:
                 P1[i11]=np.mean([P0[i11-1],P0[i11],P0[i11+1]])
@@ -182,9 +185,11 @@ for i1 in range(0, len(soubor)):
     vystup.close
     
     
-    
-print('Hotovo! Zobrazuji grafy.')
-#plt.show()
+if (grafy=='ano') or (grafy=='Ano') or (grafy=='a') or (grafy=='A') or (grafy=='1') or (grafy=='Y') or (grafy=='y') or (grafy=='yes') or (grafy=='Yes'):
+    print('Hotovo! Zobrazuji grafy.')
+    plt.show()
+else:
+    print('Hotovo!')
     
 #del(i0,i1,i2,Y,Y0,C,C2)
     
