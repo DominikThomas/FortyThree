@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# -*- coding: latin-1 -*-
+# -*- coding: utf-8 -*-
 
 #import matplotlib
 #matplotlib.use("Qt4Agg")
@@ -12,6 +12,7 @@ sirka=2
 cykl=20 #počet cyklů na vyhlazení pozadí 
 vyhlazeni="NE" #zda vyhlazovat samotné spektrum
 vaha=50 #váha prostřední hodnoty při vyhlazování spektra
+ampl=10 #diskriminace dle plochy píku bez pozadí, píky s plochou menší než 'ampl' nebudou vypsány ve výstupním souboru
 
 ## Načtení a zpracování konfiguračního souboru
 
@@ -143,7 +144,7 @@ for i1 in range(0, len(soubor)):
         G26.append(G21[i9b]-(G24[i9b-1]/2+G24[i9b]/2)*G25[i9b])
         
     for i9c in range(0,len(G26)):
-        if G26[i9c]<0:
+        if G26[i9c]<ampl:
             G20[i9c]=[];G21[i9c]=[];G22[i9c]=[];G23[i9c]=[];G24[i9c]=[];G25[i9c]=[];G26[i9c]=[]
     for i9d in range(0,G20.count([])):
         G20.remove([]);G21.remove([]);G22.remove([]);G23.remove([]);G24.remove([]);G25.remove([]);G26.remove([])
@@ -159,7 +160,7 @@ for i1 in range(0, len(soubor)):
     plt.plot(C2, Y) #vykreslení spektra
     plt.plot(X, G24, 'r') #vykreslení pozadí
     
-## Načtení hodnot tlive treal a data ze souboru txt    
+## Načtení hodnot tlive treal a data ze souboru txt     
     
     text=glob.glob(soubor[i1].replace('spc_frk', 'txt').replace('.FRK','.TXT'))
     f2=open(text[0])
@@ -174,10 +175,10 @@ for i1 in range(0, len(soubor)):
     
     vystup = open(soubor[i1].replace(pathFRK + '/', '').replace('FRK','OUTpy'),'w')
     vystup.write('Vyhodnocováno souborem: %s \n \n' %(str(os.path.basename(__file__))))
-    vystup.write('%s \n %s \n %s \n \n' %(Time, Treal, Tlive)) 
-    vystup.write('Energie (keV)        Plocha (-)\n')
+    vystup.write('%s \n%s \n%s \n \n' %(Time, Treal, Tlive)) 
+    vystup.write('Energie (keV)                Plocha (-)\n')
     for i in range (0,len(G20)):
-        vystup.write('%f                   %f \n' % (G20[i], G26[i]) )
+        vystup.write('%13f            %14f \n' % (G20[i], G26[i]) )
     vystup.close
     
     
